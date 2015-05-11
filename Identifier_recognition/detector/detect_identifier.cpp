@@ -35,12 +35,14 @@ const float min_fill_area = 0.2;
 const float min_ratio = 0.45;
 const float max_ratio = 0.97;
 
-vector<String> templates_file_names;
+//vector<String> templates_file_names;
 //static const char* names[] = { "../data/pic1.png", "../data/pic2.png", "../data/pic3.png", "../data/pic4.png", "../data/pic5.png", "../data/pic6.png", 0 };
 static const char *symbols_files [] = { "s0.bmp", "s1.bmp", "s2.bmp", "s3.bmp", "s4.bmp", "s5.bmp", "s6.bmp", "s7.bmp", "s8.bmp", "s9.bmp", "s10.bmp",
 										"s11.bmp", "s12.bmp", "s13.bmp", "s14.bmp", "s15.bmp", "s16.bmp", "s17.bmp", "s18.bmp", "s19.bmp", "s20.bmp",
 										"s21.bmp", "s22.bmp", "s23.bmp", "s24.bmp", "s25.bmp"};
+static const int symbols_files_len = 26;
 static const char *digit_files [] = {"n0.bmp", "n1.bmp", "n2.bmp", "n3.bmp", "n4.bmp", "n5.bmp", "n6.bmp", "n7.bmp", "n8.bmp", "n9.bmp"};
+static const int digit_files_len = 10;
 
 RNG rng(12345);
 
@@ -78,26 +80,38 @@ bool compare_two_symbols_contours (smbl_contour c1, smbl_contour c2)
 void detectIdentifier( Mat frame, vector<tmpl_inf> *templates );
 void extractIdentifier( Mat frame, char **result, vector<tmpl_inf> *templates);
 
-int loadTemplates(vector<tmpl_inf> *templates, char ** file)
+int loadTemplates(vector<tmpl_inf> *templates, const char ** file, int file_len, const char *file_dir)
 /*
 *загружает фотографии с шаблонами, обрабатывает их
 * возвращает число успешно обработанных шаблонов
 */
 {
 	int success_load = 0;
-	int templates_amount = templates_file_names.size();	
+	//int templates_amount = templates_file_names.size();
 
-	if (templates_amount == 0)
+	if (file_len == 0)
 		return 0;
 
-	for (int i = 0; i < templates_amount; i++)
+
+	char real_file [1024];
+	char *pfile = real_file;
+	if (file_dir != NULL)
 	{
-		cout << templates_file_names[i] << endl;
+		snprintf (real_file, sizeof(real_file), "%s/", file_dir);
+		pfile += strlen(file_dir);
+	}
+
+
+	for (int i = 0; i < file_len; i++)
+	{
+		strcpy(pfile, file[i]);
+		cout << real_file << endl;
 		tmpl_inf templ;
-		templ.file_name = templates_file_names[i];
+		templ.file_name = real_file;
+		
 		templ.templ = imread(templ.file_name, CV_LOAD_IMAGE_COLOR);   // Read the file
     	if(! templ.templ.data )                              // Check for invalid input
-    		cout << error_tag << "Error loading template \""<< templates_file_names[i] <<"\""<< endl;
+    		cout << error_tag << "Error loading template \""<< file[i] <<"\""<< endl;
     	else
     		success_load++;
     	(*templates).push_back(templ);
@@ -198,7 +212,7 @@ int processTemplates(vector<tmpl_inf> *templates)
 
 int main( int argc, char ** argv )
 {
-	for (int i = 0; i < BASIC_SYMBOL_TEMPLATES_AMOUNT; i++)
+	/*for (int i = 0; i < BASIC_SYMBOL_TEMPLATES_AMOUNT; i++)
 	{
 		char ss[100];
 		snprintf(ss, sizeof(ss), "%s/s%i.bmp", template_dir, i);
@@ -209,7 +223,7 @@ int main( int argc, char ** argv )
 		char ss[100];
 		snprintf(ss, sizeof(ss), "%s/n%i.bmp", template_dir, i);
 		templates_file_names.push_back(ss);
-	}
+	}*/
 	
 	cout << "Cascade file name: \""<< identifier_cascade_name << "\"" << endl;
 
@@ -222,7 +236,7 @@ int main( int argc, char ** argv )
     
     //VideoCapture capture;
 
-    const char * const test_image = "image293.bmp";
+    const char * const test_image = "image337.bmp";
     Mat frame1 = imread(test_image, CV_LOAD_IMAGE_COLOR);   // Read the file
     if(! frame1.data )                              // Check for invalid input
     {
@@ -230,23 +244,24 @@ int main( int argc, char ** argv )
     	return -1;
     }
     
-    vector<tmpl_inf> symbols_templates;
-    if (loadTemplates(&symbols_templates, symbols_files) < 0 )
+    vector<tmpl_inf> templates;
+    //vector<tmpl_inf> symbols_templates;
+    if (loadTemplates(&templates, symbols_files, symbols_files_len, template_dir) < 0 )
     {
     	cout << error_tag << "Error loading symbols templates (\""<<template_dir<<"\")" << endl;
     	return -1;
     }
-	processTemplates(&symbols_templates);
+	//processTemplates(&templates);
     
-    vector<tmpl_inf> digit_templates;
-    if (loadTemplates(&digit_templates, digit_files) < 0 )
+    //vector<tmpl_inf> digit_templates;
+    if (loadTemplates(&templates, digit_files, digit_files_len, template_dir) < 0 )
     {
     	cout << error_tag << "Error loading digit templates (\""<<template_dir<<"\")" << endl;
     	return -1;
     }
-	processTemplates(&digit_templates);
+	processTemplates(&templates);
 
-	//detectIdentifier( frame1, &templates);
+	detectIdentifier( frame1, &templates);
 
     /*
     //-- 2. Read the video stream
