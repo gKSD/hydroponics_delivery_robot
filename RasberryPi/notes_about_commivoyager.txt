@@ -1,3 +1,15 @@
 
-пример решения
-http://aivt.ftk.spbstu.ru/media/files/2011/course/cpp/slides2/11_Voyager.pdf
+примеры решения
+1) http://aivt.ftk.spbstu.ru/media/files/2011/course/cpp/slides2/11_Voyager.pdf
+тут по слайдам как описывать ребра, как матрицу задать - кароч весь код есть
+
+2) http://dmtsoft.ru/bn/358/as/oneaticleshablon
+
+3) остюда нельзя скопировать, но там есть хорошее решение коммивояжера с подходящим размером матрицы С
+http://stud24.ru/programming-computer/realizaciya-algoritma-resheniya-zadachi-kommivoyazhera/431622-1563555-page1.html
+
+ 19 typedef struct route_item
+ 20 {
+ 21     char state; // определяет: 1. проехать перекресток 2. повернуть направо 3. повернуть налево 4. признак участка с грядкой
+ 22     route_item *next;
+ 23     route_item *prev;
