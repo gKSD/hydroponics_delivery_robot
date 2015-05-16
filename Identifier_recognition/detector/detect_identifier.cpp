@@ -18,6 +18,7 @@ using namespace cv;
 #define BASIC_SYMBOL_TEMPLATES_AMOUNT 26
 #define BASIC_DIGIT_TEMPLATES_AMOUNT 10
 
+//Касательно распознавалки сайт http://habrahabr.ru/company/recognitor/blog/225913/
 
 /** Global variables */
 
