@@ -8,8 +8,23 @@
 3) остюда нельзя скопировать, но там есть хорошее решение коммивояжера с подходящим размером матрицы С
 http://stud24.ru/programming-computer/realizaciya-algoritma-resheniya-zadachi-kommivoyazhera/431622-1563555-page1.html
 
+
+
+http://habr.x1site.ru/
+
+
+
+
  19 typedef struct route_item
  20 {
  21     char state; // определяет: 1. проехать перекресток 2. повернуть направо 3. повернуть налево 4. признак участка с грядкой
  22     route_item *next;
  23     route_item *prev;
+
+
+
+wiringPi - for C serial 
+
+	to compile programs with wriingPi, you need add:
+		-lwiringPi
+		-lwiringPiDev
