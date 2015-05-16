@@ -1,0 +1,3 @@
+
+пример решения
+http://aivt.ftk.spbstu.ru/media/files/2011/course/cpp/slides2/11_Voyager.pdf
