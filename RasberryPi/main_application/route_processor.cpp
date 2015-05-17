@@ -13,10 +13,22 @@ route_vector Route_processor::run(std::vector<char*>& garden_beds)
 {
     route_vector vec;
     route_item *item = new route_item;
-    item->state = 'q'; //test!!!!!!!!!!!!!!
+    item->state = '+';
     vec.push_back(item);
-    item = new route_item;
-    item->state = 'e';
     vec.push_back(item);
+item = new route_item;
+    item->state = '+';
+    vec.push_back(item);
+item = new route_item;
+    item->state = '>';
+    vec.push_back(item);
+item = new route_item;
+item = new route_item;
+    item->state = '+';
+    vec.push_back(item);
+item = new route_item;
+    item->state = '*';
+    vec.push_back(item);
+
     return vec;
 }

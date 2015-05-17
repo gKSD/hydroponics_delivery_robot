@@ -68,7 +68,7 @@ void Serial::serial_puts (char *s)
 int Serial::serial_data_available()
 // Returns the number of characters available for reading, or -1 for any error condition, in which case errno will be set appropriately.
 {
-    return 1;
+    return 3;
 }
 
 char Serial::serial_getchar()

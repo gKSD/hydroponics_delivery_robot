@@ -1,7 +1,7 @@
 #ifndef UART_COMMANDS_H_
 #define UART_COMMANDS_H_
 
-#include <Arduino.h> //needed for Serial.println
+//#include <Arduino.h> //needed for Serial.println
 
 //РєРѕРјР°РЅРґС‹ Р·Р°РїСЂРѕСЃР° РѕС‚ RaspberryPi Arduino
 const char UART_RUN_FORWARD_TILL_CROSSROAD = 'a';
@@ -51,7 +51,7 @@ const char UART_RUN_FORWARD_STARTED = 'Q';
 const char UART_RUN_BACK_STARTED = 'Z';
 const char UART_RUN_BACK_BY_DISTANCE_COMPLETED = 'L';
 
-const char UART_WAIT_ANSWER_TIMEOUT = 'V'
+const char UART_WAIT_ANSWER_TIMEOUT = 'V';
 const char UART_RETURN_TO_BASE_STARTED = 'W';
 
 
