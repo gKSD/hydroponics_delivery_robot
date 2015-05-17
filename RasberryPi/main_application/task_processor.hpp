@@ -7,6 +7,7 @@
 #include "server_data.hpp"
 #include "route_processor.hpp"
 #include "serial.hpp"
+#include "../../Identifier_recognition/detector/detect_identifier.hpp"
 
 class Task_processor
 {
@@ -25,10 +26,14 @@ class Task_processor
         void set_tasks (task task);
 
         int run_task (); // команда, запускающая движение
+
+        int pour_liquid(int ml);
+
     private:
         void extract_garden_bed_addresses();
-        void process_garden_bed();
+        int process_garden_bed();
         void clear_route_vector ();
+        int get_ml_by_id(char *id);
 
     private:
         route_vector _route_vector;
@@ -38,6 +43,8 @@ class Task_processor
         std::vector <char *> _garden_bed_addresses;
 
         Serial _serial;
+
+        Identifier_detector _detector;
 
     public:
 };

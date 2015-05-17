@@ -16,6 +16,7 @@
 #include "opencv/highgui.h"
 
 #include "../../RasberryPi/main_application/error_codes.hpp"
+#include "../../RasberryPi/main_application/common.hpp"
 
 using namespace std;
 using namespace cv;
@@ -23,6 +24,10 @@ using namespace cv;
 #define BASIC_TEMPLATES_AMOUNT 36
 #define BASIC_SYMBOL_TEMPLATES_AMOUNT 26
 #define BASIC_DIGIT_TEMPLATES_AMOUNT 10
+
+
+#define WIDTH_DISTANCE_FROM_BOUNDARY_MIN 100
+#define WIDTH_DISTANCE_FROM_BOUNDARY_MAX 150
 
 //Касательно распознавалки сайт http://habrahabr.ru/company/recognitor/blog/225913/
 
@@ -74,11 +79,12 @@ typedef struct symbol_contour
 	vector<Point> contour;
 } smbl_contour;
 
+
 class Identifier_detector
 {
     public:
-    	void detectIdentifier( Mat frame);
-		void extractIdentifier( Mat frame, char **result); //, vector<tmpl_inf> *templates);
+    	int detectIdentifier( Mat frame);
+		void extractIdentifier(); // Mat frame); //, char **result); //, vector<tmpl_inf> *templates);
 		int loadTemplates(vector<tmpl_inf> *templates, const char ** file, int file_len, const char *file_dir);
 		int processTemplates(vector<tmpl_inf> *templates);
 
@@ -86,6 +92,9 @@ class Identifier_detector
 
 		int run_detector(); //main
 		Identifier_detector();
+
+		int open_video_capture();
+		char *get_extracted_id() { return extracted_id; }
 
     private:
     	//bool compare_two_symbols_contours (smbl_contour c1, smbl_contour c2);
@@ -98,6 +107,10 @@ class Identifier_detector
     	RNG rng;
     	vector<tmpl_inf> templates;
 
+    	Mat detected_roi;
+    	char *extracted_id;
+
+    	VideoCapture capture;
 };
 
 #endif // _DETECT_IDENTIFIER_HPP_

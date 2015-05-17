@@ -4,6 +4,12 @@
 #include <vector>
 #include <cstddef>
 
+#define MOVE_BACK       0
+#define MOVE_FORWARD    1
+#define MOVE_STOP       2
+#define NO_IDENTIFIER   3
+
+
 //элементы, определяющие действия на перекрестках
 static const char r_back = 'b';
 static const char r_forward = 'f';
@@ -12,6 +18,7 @@ static const char r_left = '<';
 static const char r_right = '>';
 static const char r_turn_around = '&';
 static const char r_deadlock = 'd';
+static const char r_base = '!';
 
 
 static const char r_final = '*'; //признак участка с грядкой

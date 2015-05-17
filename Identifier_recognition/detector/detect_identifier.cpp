@@ -41,6 +41,10 @@ Identifier_detector::Identifier_detector():rng(12345)
     	throw IDENTIFIER_TEMPLATE_LOAD_ERROR;
     }
 	processTemplates(&templates);
+
+	extracted_id = NULL;
+	open_video_capture();
+	//
 }
 
 int Identifier_detector::loadTemplates(vector<tmpl_inf> *templates, const char ** file, int file_len, const char *file_dir)
@@ -176,7 +180,8 @@ int Identifier_detector::processTemplates(vector<tmpl_inf> *templates)
 
 int Identifier_detector::run_detector()
 {
-	VideoCapture capture ("127.0.0.1:5000/video_feed");
+	int res;
+	/*
 	if ( ! capture.isOpened() )
 	{ 
 		cout << "Error opening video capture" << endl;
@@ -192,15 +197,14 @@ int Identifier_detector::run_detector()
         }
         imshow( "video", frame);
         //-- 3. Apply the classifier to the frame
-        //detectIdentifier( frame );
+        //res = detectIdentifier( frame );
 
         //-- bail out if escape was pressed
         int c = waitKey(10);
         if( (char)c == 27 ) { break; }
-    }
+    }*/
 
-    //const char * const test_image = "image337.bmp";
-    /*const char * const test_image = "127.0.0.1:5000/video_feed";
+    const char * const test_image = "image293.bmp";
     Mat frame1 = imread(test_image, CV_LOAD_IMAGE_COLOR);   // Read the file
     if(! frame1.data )                              // Check for invalid input
     {
@@ -208,15 +212,26 @@ int Identifier_detector::run_detector()
     	//throw 5;
         return -1;
     }
-    imshow("video", frame1);*/
+    imshow("video", frame1);
+    res = detectIdentifier( frame1 );
 
-    //detectIdentifier( frame1 );
-
-    cvWaitKey(0);
-    return 0;
+    return res;
 }
 
-void Identifier_detector::detectIdentifier( Mat frame)
+int Identifier_detector::open_video_capture()
+{
+	if ( ! capture.isOpened() )
+		capture.open("127.0.0.1:5000/video_feed");
+
+	if ( ! capture.isOpened() )
+	{ 
+		cout << "Error opening video capture" << endl;
+		return -1; 
+	}
+	return 1;
+}
+
+int Identifier_detector::detectIdentifier( Mat frame)
 {
     std::vector<Rect> identifiers;
     Mat frame_gray;
@@ -231,17 +246,55 @@ void Identifier_detector::detectIdentifier( Mat frame)
 
     //для всех найденных идентификаторов вырезаем область с идентификаторов и распознаем идентификационный номер
     int identifiers_size = identifiers.size();
+    
+    int rows = frame.rows;
+	int cols = frame.cols;
     for( size_t i = 0; i < identifiers_size; i++ )
     {
-        Mat identifier_roi = frame_gray( identifiers[i] );
-        imshow( window_name_with_id_ROI, identifier_roi );
-        char *extracted_id = NULL;
-        extractIdentifier(identifier_roi, &extracted_id); //, templates);
+    	int x = identifiers[i].x;
+    	int y = identifiers[i].y;
+    	cout << "!!! x => " << x << "; y => " << y << endl;
+    	cout << "!!! length => " << identifiers[i].height << "; width => " << identifiers[i].width << endl;
+
+    	if (abs(identifiers[i].height - identifiers[i].width) > 30)
+    	{
+    		cout << "Identifier is to far" << endl;
+    		return MOVE_FORWARD;
+    	}
+
+    	if ( identifiers[i].height > 440 || identifiers[i].width > 440)
+    	{
+    		cout << "Identifier is to far" << endl;
+    		return MOVE_BACK;
+    	}
+
+    	if ( identifiers[i].height < 320 || identifiers[i].width < 320)
+    	{
+    		cout << "Identifier is to far" << endl;
+    		return MOVE_FORWARD;
+    	}
+
+    	//определяем смещение - важно для стабилизации картинки
+    	if ( x > WIDTH_DISTANCE_FROM_BOUNDARY_MAX)
+    	{
+    		return MOVE_FORWARD;
+    	}
+    	if ( x > WIDTH_DISTANCE_FROM_BOUNDARY_MIN)
+    	{
+    		return MOVE_BACK;
+    	}
+
+        //Mat identifier_roi = frame_gray( identifiers[i] );
+        detected_roi = frame_gray( identifiers[i] );
+        return MOVE_STOP;
+        //imshow( window_name_with_id_ROI, identifier_roi );
+        //char *extracted_id = NULL;
+        //extractIdentifier(identifier_roi, &extracted_id); //, templates);
     }
-    
+    return NO_IDENTIFIER;
 }
 
-void Identifier_detector::extractIdentifier( Mat frame, char **result/*, vector<tmpl_inf> *templates*/)
+void Identifier_detector::extractIdentifier()// Mat frame)//, char **result/*, vector<tmpl_inf> *templates*/)
 //вариант с бинаризацией (по хорошему только для чистых идентификаторов)
 {
 
@@ -274,7 +327,7 @@ void Identifier_detector::extractIdentifier( Mat frame, char **result/*, vector<
   	//findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
   	Mat frame_bin;
-    adaptiveThreshold(frame, frame_bin, 250, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 15, 0);
+    adaptiveThreshold(detected_roi, frame_bin, 250, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 15, 0);
     imshow(window_name1, frame_bin);
     findContours( frame_bin, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cvPoint(0,0));
 
@@ -352,7 +405,7 @@ void Identifier_detector::extractIdentifier( Mat frame, char **result/*, vector<
 		
 		// these lines - fixing bug with copying image after findContours()
 		Mat test;
-    	adaptiveThreshold(frame, test, 250, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 15, 0);
+    	adaptiveThreshold(detected_roi, test, 250, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 15, 0);
 		Mat roi(test, rect);
 
 

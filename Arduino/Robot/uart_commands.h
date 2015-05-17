@@ -26,6 +26,9 @@ const char UART_RUN_BACK_BY_DISTANCE = 'U';
 
 const char UART_SET_DIRECTION = 'X';
 const char UART_GET_CURRENT_DIRECTION = 'Y';
+
+const char UART_PROCESS_BASE = 'M'; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 //РєРѕРјР°РЅРґС‹ РѕС‚РІРµС‚Р° Arduino RasberryPi
 const char UART_REACH_DEADLOCK_ERROR = 'q'; // РґРѕСЃС‚РёРіР»Рё С‚СѓРїРёРєР°
 const char UART_TURN_COMPLETED = 'r';
@@ -60,5 +63,5 @@ const char UART_COMMAND_LAST_SYMBOL = '*';
 const char UART_RESET_SYSTEM = '!';
 
 #endif // UART_COMMANDS_H_
-// M P N s y g k m n 
+// P N s y g k m n 
 

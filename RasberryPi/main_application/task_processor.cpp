@@ -188,12 +188,25 @@ int Task_processor::run_task()
             char state = subroute->state;
             if (subroute->next == NULL)
             {
-                if (state != r_final)
+                if (state != r_final && state != r_base)
                 {
                     std::cout << "Error: route last symbol must be '*'" << std::endl;
                     return -1;
                 }
-                process_garden_bed();
+                if (state == r_final)
+                {
+                    if (process_garden_bed() < 0)
+                    {
+                        _serial.serial_putchar(UART_STOP);
+                        _serial.serial_putchar(UART_COMMAND_LAST_SYMBOL);
+                        throw CAMERA_CAPTURE_ERROR;
+                    }
+                }
+                else
+                {
+                    _serial.serial_putchar(UART_PROCESS_BASE);
+                    _serial.serial_putchar(UART_COMMAND_LAST_SYMBOL);
+                }
                 break;
             }
 
@@ -223,13 +236,14 @@ int Task_processor::run_task()
                 case r_crossroad:
                 {
                     _serial.serial_putchar(UART_RUN_FORWARD_TILL_CROSSROAD);
-                    if (subroute->next->state == r_final)
+                    if (subroute->next->state == r_final  || subroute->next->state == r_base)
                         _serial.serial_putchar('0');
                     else
                         _serial.serial_putchar('1');
                     _serial.serial_putchar(UART_COMMAND_LAST_SYMBOL);
                     break;
                 }
+                case r_base:
                 case r_final:
                 {
                     break;
@@ -266,6 +280,165 @@ const char UART_GET_CURRENT_DIRECTION = 'Y';
     return 1;
 }
 
-void Task_processor::process_garden_bed()
-{}
+int Task_processor::process_garden_bed()
+{
+    if (_detector.open_video_capture() < 0)
+    {
+        return CAMERA_CAPTURE_ERROR;
+    }
+
+    bool is_first = true, success = false;
+    char position = '\0';
+    int state = -1;
+
+    while (state != MOVE_STOP)
+    {
+        _serial.serial_putchar(UART_RUN_FORWARD_TILL_CROSSROAD);
+        _serial.serial_putchar('0');
+        _serial.serial_putchar(UART_COMMAND_LAST_SYMBOL);
+        sleep(100);
+        _serial.serial_putchar(UART_STOP);
+        _serial.serial_putchar(UART_COMMAND_LAST_SYMBOL);
+
+        if (!success || position == r_right)
+        {
+            _serial.serial_putchar(UART_TURN_CAMERA_RIGHT);
+            _serial.serial_putchar(UART_COMMAND_LAST_SYMBOL);
+            state = _detector.run_detector();
+            success = true;
+            switch (state)
+            {
+                case NO_IDENTIFIER:
+                    if (is_first) success = false;
+                    break;
+                case MOVE_FORWARD:
+                    if (is_first)
+                    {
+                        is_first = false;
+                        position = r_right;
+                    }
+                    _serial.serial_putchar(UART_RUN_FORWARD_TILL_CROSSROAD);
+                    _serial.serial_putchar('0');
+                    _serial.serial_putchar(UART_COMMAND_LAST_SYMBOL);
+                    break;
+                case MOVE_BACK:
+                    if (is_first)
+                    {
+                        is_first = false;
+                        position = r_right;
+                    }
+                    _serial.serial_putchar(UART_RUN_BACK);
+                    _serial.serial_putchar(UART_COMMAND_LAST_SYMBOL);
+                    break;
+                case MOVE_STOP:
+                    if (is_first)
+                    {
+                        is_first = false;
+                        position = r_right;
+                    }
+                    _serial.serial_putchar(UART_STOP);
+                    _serial.serial_putchar(UART_COMMAND_LAST_SYMBOL);
+                    char *id = _detector.get_extracted_id();
+                    pour_liquid(get_ml_by_id(id));
+                break;
+            }
+        }
+        if (!success || position == r_left)
+        {
+            _serial.serial_putchar(UART_TURN_CAMERA_LEFT);
+            _serial.serial_putchar(UART_COMMAND_LAST_SYMBOL);
+            state = _detector.run_detector();
+            switch (state)
+            {
+                case NO_IDENTIFIER:
+                    if (is_first) success = false;
+                    break;
+                case MOVE_FORWARD:
+                    if (is_first)
+                    {
+                        is_first = false;
+                        position = r_left;
+                    }
+                    _serial.serial_putchar(UART_RUN_FORWARD_TILL_CROSSROAD);
+                    _serial.serial_putchar('0');
+                    _serial.serial_putchar(UART_COMMAND_LAST_SYMBOL);
+                    break;
+                case MOVE_BACK:
+                    if (is_first)
+                    {
+                        is_first = false;
+                        position = r_left;
+                    }
+                    _serial.serial_putchar(UART_RUN_BACK);
+                    _serial.serial_putchar(UART_COMMAND_LAST_SYMBOL);
+                    break;
+                case MOVE_STOP:
+                    if (is_first)
+                    {
+                        is_first = false;
+                        position = r_left;
+                    }
+                    _serial.serial_putchar(UART_STOP);
+                    _serial.serial_putchar(UART_COMMAND_LAST_SYMBOL);
+                    char *id = _detector.get_extracted_id();
+                    pour_liquid(get_ml_by_id(id));
+                break;
+            }
+        }
+    }
+}
+
+int Task_processor::get_ml_by_id(char *id)
+{
+    int tasks_size = _tasks.size();
+    for (int i = 0; i < tasks_size; i++)
+    {
+        if (strcasecmp(_tasks[i]._address, id) == 0)
+            return _tasks[i]._ml;
+    }
+}
+
+int Task_processor::pour_liquid(int ml)
+{
+    _serial.serial_putchar(UART_POUR_LIQUID_ML);
+    char str[100];
+    memset(str, 0, sizeof(str));
+    sprintf(str, "%d", ml);
+    _serial.serial_puts(str);
+    _serial.serial_putchar(UART_COMMAND_LAST_SYMBOL);
+
+    int data_am = 0;
+    while (!(data_am = _serial.serial_data_available())) ; // ожидаем ответ
+    char data[100];
+    int data_len = 0;
+
+    for (int i = data_am - 1; i >= 0 && data_len < 100; i--, data_len++)
+    {
+        data[data_len] = _serial.serial_getchar();
+    }
+
+    if (*data == UART_POUR_LIQUID_ERROR)
+    {
+        cout << "Error: poouring liquid!" <<endl;
+        return -1;
+    }
+    if (*data == UART_POUR_LIQUID_COMPLETED)
+        return 1;
+       
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

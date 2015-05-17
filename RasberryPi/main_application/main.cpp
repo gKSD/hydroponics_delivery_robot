@@ -81,9 +81,14 @@ int main (int argc, char **argv)
         proc.run_task();
         cout << "11111111111111111 " << endl;
     }
-    catch(int)
+    catch(int er)
     {
         cout << "error detected" << endl;
+
+        if (er == CAMERA_CAPTURE_ERROR)
+        {
+            cout << "Error: camera capture error" << endl;
+        }
     }
     return 1;
 }
