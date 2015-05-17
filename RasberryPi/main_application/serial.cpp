@@ -2,19 +2,26 @@
 
 #include <iostream>
 #include <string.h>
-
+#include "wiringSerial.h"
+#include "wiringPi.h"
 #include "error_codes.hpp"
 
 //wiringPi help => https://projects.drogon.net/raspberry-pi/wiringpi/serial-library/
 
-void Serial::uart_setup()
+int Serial::uart_setup()
 {
-    tcgetattr (fd, &_options) ;   // Read current options
+/*    tcgetattr (fd, &_options) ;   // Read current options
     _options.c_cflag &= ~CSIZE ;  // Mask out size
     _options.c_cflag |= CS7 ;     // Or in 7-bits
     _options.c_cflag |= PARENB ;  // Enable Parity - even by default
     tcsetattr (fd, &_options) ;   // Set new options
-    
+*/  
+    if (wiringPiSetup () == -1)
+    {
+        std::cout << "Unable to start wiringPi"<< std::endl;
+        return -1 ;
+    }
+
 }
 
 void Serial::serial_open()
@@ -44,6 +51,7 @@ void Serial::set_device(const char *device)
     int dev_len = strlen(device);
     _device = new char [dev_len];
     strcpy(_device, device);
+    std::cout<<"new device: " << _device << std::endl;
 }
 
 //****
@@ -96,5 +104,5 @@ void Serial::serial_flush()
 
 Serial::~Serial()
 {
-    if (_device != NULL ) delete [] _device;
+    //if (_device != NULL ) delete [] _device;
 }
