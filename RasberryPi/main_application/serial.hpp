@@ -21,7 +21,7 @@ class Serial
         void serial_putchar(unsigned char c);
         void serial_puts(char *s);
         int serial_data_available();
-        int serial_getchar();
+        char serial_getchar();
         void serial_flush();
         ~Serial();
 };

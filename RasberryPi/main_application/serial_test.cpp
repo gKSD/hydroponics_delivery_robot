@@ -2,26 +2,13 @@
 
 #include <iostream>
 #include <string.h>
-#include "wiringSerial.h"
-#include "wiringPi.h"
 #include "error_codes.hpp"
 
 //wiringPi help => https://projects.drogon.net/raspberry-pi/wiringpi/serial-library/
 
 int Serial::uart_setup()
 {
-/*    tcgetattr (fd, &_options) ;   // Read current options
-    _options.c_cflag &= ~CSIZE ;  // Mask out size
-    _options.c_cflag |= CS7 ;     // Or in 7-bits
-    _options.c_cflag |= PARENB ;  // Enable Parity - even by default
-    tcsetattr (fd, &_options) ;   // Set new options
-*/  
-    if (wiringPiSetup () == -1)
-    {
-        std::cout << "Unable to start wiringPi"<< std::endl;
-        return -1 ;
-    }
-
+    return 1;
 }
 
 void Serial::serial_open()
@@ -31,7 +18,7 @@ void Serial::serial_open()
         throw SERIAL_PARAMS_NOT_SET;
     }
 
-    _fd = serialOpen(_device, _baud);
+    _fd = 15;
     if(_fd == -1)
     {
         throw SERIAL_OPEN_ERROR;
@@ -39,6 +26,7 @@ void Serial::serial_open()
 }
 void Serial::serial_open(const char *device, int baud)
 {
+    std::cout << ">>> Serial open" << std::endl;
     set_device(device);
     _baud = baud;
     serial_open();
@@ -46,6 +34,7 @@ void Serial::serial_open(const char *device, int baud)
 
 void Serial::set_device(const char *device)
 {
+    std::cout << ">>> Serial set device" << std::endl;
     if (_device != NULL)
         delete [] _device;
     int dev_len = strlen(device);
@@ -59,21 +48,18 @@ void Serial::set_device(const char *device)
 void Serial::serial_close()
 //Closes the device identified by the file descriptor given.
 {
-    if (_fd >= 0)
-        serialClose(_fd);
+    std::cout << ">>> Serial close" << std::endl;
 }
 
 void Serial::serial_putchar(unsigned char c)
 //Sends the single byte to the serial device identified by the given file descriptor.
 {
-    if (_fd >= 0)
-        serialPutchar (_fd, c);
+    std::cout << ">>> Serial putchar: "<< c << std::endl;
 }
 
 void Serial::serial_puts (char *s)
 {
-    if (_fd >= 0)
-        serialPuts (_fd, s) ;
+    std::cout << ">>> Serial puts: " << s << std::endl;
 }
 
 // Possible:  void  serialPrintf (int fd, char *message, …) ;
@@ -82,24 +68,21 @@ void Serial::serial_puts (char *s)
 int Serial::serial_data_available()
 // Returns the number of characters available for reading, or -1 for any error condition, in which case errno will be set appropriately.
 {
-    if (_fd >= 0)
-        return serialDataAvail (_fd) ;
-    return -1;
+    return 1;
 }
 
 char Serial::serial_getchar()
 // Returns the next character available on the serial device. This call will block for up to 10 seconds if no data is available (when it will return -1)
 {
-    if (_fd >= 0)
-        return serialGetchar (_fd) ;
-    return-1;
+    char *c = new char;
+    std::cout << ">>> Serial getchar, enter char: ";
+    std::cin >> c;
+    return *c;
 }
 
 void Serial::serial_flush()
 // This discards all data received, or waiting to be send down the given device.
 {
-    if (_fd >= 0)
-        serialFlush (_fd);
 }
 
 Serial::~Serial()
