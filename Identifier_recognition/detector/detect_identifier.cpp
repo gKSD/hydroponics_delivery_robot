@@ -176,8 +176,7 @@ int Identifier_detector::processTemplates(vector<tmpl_inf> *templates)
 
 int Identifier_detector::run_detector()
 {
-	VideoCapture capture;
-	capture.open("localhost:5000/");
+	VideoCapture capture ("127.0.0.1:5000/video_feed");
 	if ( ! capture.isOpened() )
 	{ 
 		cout << "Error opening video capture" << endl;
@@ -201,12 +200,16 @@ int Identifier_detector::run_detector()
     }
 
     //const char * const test_image = "image337.bmp";
-    //Mat frame1 = imread(test_image, CV_LOAD_IMAGE_COLOR);   // Read the file
-    //if(! frame1.data )                              // Check for invalid input
-    //{
-    //	cout << error_tag << "Error loading image \""<< test_image <<"\""<< endl;
-    //	throw 5;
-    //}
+    /*const char * const test_image = "127.0.0.1:5000/video_feed";
+    Mat frame1 = imread(test_image, CV_LOAD_IMAGE_COLOR);   // Read the file
+    if(! frame1.data )                              // Check for invalid input
+    {
+    	cout << error_tag << "Error loading image \""<< test_image <<"\""<< endl;
+    	//throw 5;
+        return -1;
+    }
+    imshow("video", frame1);*/
+
     //detectIdentifier( frame1 );
 
     cvWaitKey(0);
