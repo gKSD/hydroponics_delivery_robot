@@ -1,49 +1,87 @@
+#include <iostream>
 
-#include "detect_identifier.hpp"
+#include <string.h>
+#include <stdio.h>
+
+#include "opencv2/objdetect.hpp"
+#include "opencv2/videoio.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
+
+#include <opencv/cv.h>
+#include "opencv/highgui.h"
 
 using namespace std;
 using namespace cv;
-//RNG rng(12345);
 
+#define BASIC_TEMPLATES_AMOUNT 36
+#define BASIC_SYMBOL_TEMPLATES_AMOUNT 26
+#define BASIC_DIGIT_TEMPLATES_AMOUNT 10
+
+//Касательно распознавалки сайт http://habrahabr.ru/company/recognitor/blog/225913/
+
+/** Global variables */
+
+const char error_tag[] = "[ERROR]";
+String identifier_cascade_name = "../Haar/haarcascade\\cascade.xml";
+CascadeClassifier identifier_cascade;
+
+const char window_name[] = "Capture - Identifier detection";
+const char window_name_with_id_ROI[] = "Detected identifier";
+const char template_dir[] = "../Templates/tanulic/";
+
+const int min_symbol_width = 55;
+const int min_symbol_height = 85;
+const float min_fill_area = 0.2;
+const float min_ratio = 0.45;
+const float max_ratio = 0.97;
+
+//vector<String> templates_file_names;
+//static const char* names[] = { "../data/pic1.png", "../data/pic2.png", "../data/pic3.png", "../data/pic4.png", "../data/pic5.png", "../data/pic6.png", 0 };
+static const char *symbols_files [] = { "s0.bmp", "s1.bmp", "s2.bmp", "s3.bmp", "s4.bmp", "s5.bmp", "s6.bmp", "s7.bmp", "s8.bmp", "s9.bmp", "s10.bmp",
+										"s11.bmp", "s12.bmp", "s13.bmp", "s14.bmp", "s15.bmp", "s16.bmp", "s17.bmp", "s18.bmp", "s19.bmp", "s20.bmp",
+										"s21.bmp", "s22.bmp", "s23.bmp", "s24.bmp", "s25.bmp"};
+static const int symbols_files_len = 26;
+static const char *digit_files [] = {"n0.bmp", "n1.bmp", "n2.bmp", "n3.bmp", "n4.bmp", "n5.bmp", "n6.bmp", "n7.bmp", "n8.bmp", "n9.bmp"};
+static const int digit_files_len = 10;
+
+RNG rng(12345);
+
+//TODO: 7) Сортируем найденные контуры в порядке увеличения координат, чтобы буквы и цифры номера были по порядку. Получаем массив контуров number.
+
+typedef struct template_information
+{
+	Mat templ;
+	Mat gray;
+	String file_name;
+	vector<vector<Point> > contours;
+	//Mat contour;
+} tmpl_inf;
+
+
+typedef struct symbol_contour
+{
+	symbol_contour(vector<Point> _contour, int _x, int _y)
+	{
+		contour = _contour;
+		x = _x;
+		y = _y;
+	}
+	int x;
+	int y;
+	vector<Point> contour;
+} smbl_contour;
 
 bool compare_two_symbols_contours (smbl_contour c1, smbl_contour c2)
 {
 	return (c1.x < c2.x);
 }
 
+/** Function Headers */
+void detectIdentifier( Mat frame, vector<tmpl_inf> *templates );
+void extractIdentifier( Mat frame, char **result, vector<tmpl_inf> *templates);
 
-Identifier_detector::Identifier_detector():rng(12345)
-{
-	cout << "Cascade file name: \""<< identifier_cascade_name << "\"" << endl;
-
-    //-- 1. Load the cascade
-    if( !identifier_cascade.load( identifier_cascade_name ) )
-    {
-    	cout << error_tag<<" Error loading identifier cascade\n" << endl;
-    	throw IDENTIFIER_ERROR_LOADING_CASCADE;
-    };
-    
-    
-    //vector<tmpl_inf> templates;//берем системную переменную
-
-    //vector<tmpl_inf> symbols_templates;
-    if (loadTemplates(&templates, symbols_files, symbols_files_len, template_dir) < 0 )
-    {
-    	cout << error_tag << "Error loading symbols templates (\""<<template_dir<<"\")" << endl;
-    	throw IDENTIFIER_TEMPLATE_LOAD_ERROR;
-    }
-	//processTemplates(&templates);
-    
-    //vector<tmpl_inf> digit_templates;
-    if (loadTemplates(&templates, digit_files, digit_files_len, template_dir) < 0 )
-    {
-    	cout << error_tag << "Error loading digit templates (\""<<template_dir<<"\")" << endl;
-    	throw IDENTIFIER_TEMPLATE_LOAD_ERROR;
-    }
-	processTemplates(&templates);
-}
-
-int Identifier_detector::loadTemplates(vector<tmpl_inf> *templates, const char ** file, int file_len, const char *file_dir)
+int loadTemplates(vector<tmpl_inf> *templates, const char ** file, int file_len, const char *file_dir)
 /*
 *загружает фотографии с шаблонами, обрабатывает их
 * возвращает число успешно обработанных шаблонов
@@ -85,14 +123,13 @@ int Identifier_detector::loadTemplates(vector<tmpl_inf> *templates, const char *
 	return success_load;
 }
 
-int Identifier_detector::processTemplates(vector<tmpl_inf> *templates)
+int processTemplates(vector<tmpl_inf> *templates)
 /* 
  * для каждого шаблона производим
  * 1. бинаризацию
  * 2. выделение главного контура - самый большой по размеру
  */
 {
-	cout << "******************** processTemplates ********************** " << endl;
 	int templates_size = (*templates).size();
 	for (int i = 0; i < templates_size; i++)
 	{
@@ -174,46 +211,86 @@ int Identifier_detector::processTemplates(vector<tmpl_inf> *templates)
 	return 1;
 }
 
-int Identifier_detector::run_detector()
+int main( int argc, char ** argv )
 {
-	VideoCapture capture;
-	capture.open("localhost:5000/");
-	if ( ! capture.isOpened() )
-	{ 
-		cout << "Error opening video capture" << endl;
-		return -1; 
+	/*for (int i = 0; i < BASIC_SYMBOL_TEMPLATES_AMOUNT; i++)
+	{
+		char ss[100];
+		snprintf(ss, sizeof(ss), "%s/s%i.bmp", template_dir, i);
+		templates_file_names.push_back(ss);
 	}
-	Mat frame;
-	while ( capture.read(frame) )
+	for (int i = 0; i < BASIC_DIGIT_TEMPLATES_AMOUNT; i++)
+	{
+		char ss[100];
+		snprintf(ss, sizeof(ss), "%s/n%i.bmp", template_dir, i);
+		templates_file_names.push_back(ss);
+	}*/
+	
+	cout << "Cascade file name: \""<< identifier_cascade_name << "\"" << endl;
+
+    //-- 1. Load the cascade
+    if( !identifier_cascade.load( identifier_cascade_name ) )
+    {
+    	cout << error_tag<<" Error loading identifier cascade\n" << endl;
+    	return -1;
+    };
+    
+    //VideoCapture capture;
+
+    const char * const test_image = "image337.bmp";
+    Mat frame1 = imread(test_image, CV_LOAD_IMAGE_COLOR);   // Read the file
+    if(! frame1.data )                              // Check for invalid input
+    {
+    	cout << error_tag << "Error loading image \""<< test_image <<"\""<< endl;
+    	return -1;
+    }
+    
+    vector<tmpl_inf> templates;
+    //vector<tmpl_inf> symbols_templates;
+    if (loadTemplates(&templates, symbols_files, symbols_files_len, template_dir) < 0 )
+    {
+    	cout << error_tag << "Error loading symbols templates (\""<<template_dir<<"\")" << endl;
+    	return -1;
+    }
+	//processTemplates(&templates);
+    
+    //vector<tmpl_inf> digit_templates;
+    if (loadTemplates(&templates, digit_files, digit_files_len, template_dir) < 0 )
+    {
+    	cout << error_tag << "Error loading digit templates (\""<<template_dir<<"\")" << endl;
+    	return -1;
+    }
+	processTemplates(&templates);
+
+	detectIdentifier( frame1, &templates);
+
+    /*
+    //-- 2. Read the video stream
+    capture.open( -1 );
+    if ( ! capture.isOpened() ) { printf("--(!)Error opening video capture\n"); return -1; }
+
+    while ( capture.read(frame) )
     {
         if( frame.empty() )
         {
-            cout << error_tag << "Error loading image \""<< frame <<"\""<< endl;
+            printf(" --(!) No captured frame -- Break!");
             break;
         }
-        imshow( "video", frame);
+
         //-- 3. Apply the classifier to the frame
-        //detectIdentifier( frame );
+        detectIdentifier( frame );
 
         //-- bail out if escape was pressed
         int c = waitKey(10);
         if( (char)c == 27 ) { break; }
     }
-
-    //const char * const test_image = "image337.bmp";
-    //Mat frame1 = imread(test_image, CV_LOAD_IMAGE_COLOR);   // Read the file
-    //if(! frame1.data )                              // Check for invalid input
-    //{
-    //	cout << error_tag << "Error loading image \""<< test_image <<"\""<< endl;
-    //	throw 5;
-    //}
-    //detectIdentifier( frame1 );
+    */
 
     cvWaitKey(0);
     return 0;
 }
 
-void Identifier_detector::detectIdentifier( Mat frame)
+void detectIdentifier( Mat frame, vector<tmpl_inf> *templates )
 {
     std::vector<Rect> identifiers;
     Mat frame_gray;
@@ -233,12 +310,12 @@ void Identifier_detector::detectIdentifier( Mat frame)
         Mat identifier_roi = frame_gray( identifiers[i] );
         imshow( window_name_with_id_ROI, identifier_roi );
         char *extracted_id = NULL;
-        extractIdentifier(identifier_roi, &extracted_id); //, templates);
+        extractIdentifier(identifier_roi, &extracted_id, templates);
     }
     
 }
 
-void Identifier_detector::extractIdentifier( Mat frame, char **result/*, vector<tmpl_inf> *templates*/)
+void extractIdentifier( Mat frame, char **result, vector<tmpl_inf> *templates)
 //вариант с бинаризацией (по хорошему только для чистых идентификаторов)
 {
 
@@ -270,7 +347,7 @@ void Identifier_detector::extractIdentifier( Mat frame, char **result/*, vector<
   	/// Find contours
   	//findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
-  	Mat frame_bin;
+  		Mat frame_bin;
     adaptiveThreshold(frame, frame_bin, 250, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 15, 0);
     imshow(window_name1, frame_bin);
     findContours( frame_bin, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cvPoint(0,0));
@@ -409,17 +486,17 @@ void Identifier_detector::extractIdentifier( Mat frame, char **result/*, vector<
 		double max_match_res = 1000;
 		int max_match_contour_idx = 0, max_match_subcontour_idx = 0;
 
-		int templates_size = templates.size();
+		int templates_size = (*templates).size();
 		for (int i = 0; i < templates_size; i++)
 		{
-			int templates_contours_size = templates[i].contours.size();
+			int templates_contours_size = (*templates)[i].contours.size();
 			for (int k = 0; k < templates_contours_size; k++)
 			{
 				snprintf (ss, sizeof (ss), "Templ%i", i);
 	    		//namedWindow( ss, CV_WINDOW_AUTOSIZE );
-				//imshow( ss, templates[i].contour );
+				//imshow( ss, (*templates)[i].contour );
 
-				double match0 = matchShapes(possible_symbols[j].contour, templates[i].contours[k], CV_CONTOURS_MATCH_I2, 0);
+				double match0 = matchShapes(possible_symbols[j].contour, (*templates)[i].contours[k], CV_CONTOURS_MATCH_I2, 0);
 				cout << "match" << i <<" => "<< match0 << endl;
 				if (match0 < 0.5) continue;
 				if (match0 <  max_match_res)
@@ -433,7 +510,7 @@ void Identifier_detector::extractIdentifier( Mat frame, char **result/*, vector<
 
 		cout  << "res match => "<< max_match_res << endl;
 		snprintf (ss, sizeof(ss), "%i.RES", j);
-		imshow( ss, templates[max_match_contour_idx].templ);
+		imshow( ss, (*templates)[max_match_contour_idx].templ);
 	}
 	//необходимо подготовить шаблоны для сравнения
 
