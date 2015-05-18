@@ -10,6 +10,9 @@
 
 using namespace std;
 
+
+//http://habr.x1site.ru/
+
 int main (int argc, char **argv)
 {
     /*Serial serial;
@@ -46,7 +49,16 @@ int main (int argc, char **argv)
         }
     }*/
 
-    vector<char *> garden_beds = {(char *)"C1", (char *)"B2",  (char *)"A4"};
+    char ss1[] = "a9";
+    char ss2[] = "b0";
+    char ss3[] = "c0";
+    char ss4[] = "a0";
+    vector<char *> garden_beds;// = { (char *)"a9", (char *)"b0", (char *)"c0", (char *)"a0" };
+    garden_beds.push_back(ss1);
+    garden_beds.push_back(ss2);
+    garden_beds.push_back(ss3);
+    garden_beds.push_back(ss4);
+
 
     vector<task> vv;
     task *t = new task;
