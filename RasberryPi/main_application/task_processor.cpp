@@ -5,14 +5,14 @@
 
 #include "../../Arduino/Robot/uart_commands.h"
 
-Task_processor::Task_processor(size_t left_base_pos): _route_processor(left_base_pos)
+Task_processor::Task_processor(size_t left_base_pos, int last_number, char * last_letter): _route_processor(left_base_pos, last_number, last_letter)
 {
     //set_left_base_pos(left_base_pos);
     _serial.serial_open("/dev/ttyAMA0", 9600);
     _serial.uart_setup();
 }
 
-Task_processor::Task_processor(std::vector<task> tasks, size_t left_base_pos):  _route_processor(left_base_pos)
+Task_processor::Task_processor(std::vector<task> tasks, size_t left_base_pos, int last_number, char * last_letter):  _route_processor(left_base_pos, last_number, last_letter)
 {
     set_tasks(tasks);
     //set_left_base_pos(left_base_pos);
@@ -20,7 +20,7 @@ Task_processor::Task_processor(std::vector<task> tasks, size_t left_base_pos):  
     _serial.uart_setup();
 }
 
-Task_processor::Task_processor(task task, size_t left_base_pos): _route_processor(left_base_pos)
+Task_processor::Task_processor(task task, size_t left_base_pos, int last_number, char * last_letter): _route_processor(left_base_pos, last_number, last_letter)
 {
     set_tasks(task);
     //set_left_base_pos(left_base_pos);
@@ -78,15 +78,29 @@ int Task_processor::determine_min_route()
 
     //_route_vector.clear();
     clear_route_vector();
-    _route_vector = _route_processor.run(_garden_bed_addresses);
-
-    for (int i = 0; i < _route_vector.size(); i++)
+    for (int i = 0; i < _garden_bed_addresses.size(); i++)
     {
-        std::cout << "item => "<< _route_vector[i]->state << std::endl;
+        //to delete
+        std::cout << "passed garden item: " << _garden_bed_addresses[i] << std::endl;
     }
-    for (int i = i; i < _route_vector.size(); i++)
+
+    try
     {
-        delete _route_vector[i];
+        _route_vector = _route_processor.run(_garden_bed_addresses);
+
+        for (int i = 0; i < _route_vector.size(); i++)
+        {
+            std::cout << "item => "<< _route_vector[i]->state << std::endl;
+        }
+    }
+    catch (int er)
+    {
+        if (er == GARDEN_BED_ADDRESS_ERROR)
+        {
+            std::cout << "Error: garden bed address limit exceeded!" << std::endl;
+            //TODO или дальше прокидывать еррор???
+            return -1;
+        }
     }
 
     return 1;
@@ -123,8 +137,11 @@ void Task_processor::extract_garden_bed_addresses ()
     int len = _tasks.size();
     for (int i = 0; i < len; i++)
     {
-        char address[3];
-        strcpy (address, _tasks[i]._address);
+        char * address = new char [3];
+        address[0] = _tasks[i]._address[0];
+        address[1] = _tasks[i]._address[1];
+        address[2] = '\0';
+        //strcpy (address, _tasks[i]._address);
         _garden_bed_addresses.push_back(address);
 
         //to delete
@@ -251,30 +268,6 @@ int Task_processor::run_task()
             }
             subroute = subroute->next;
         }
-        /*
-        const char UART_RUN_FORWARD_TILL_CROSSROAD = 'a';
-const char UART_RUN_FORWARD = 'b';
-const char UART_TURN_LEFT = 'c';
-const char UART_TURN_RIGHT = 'd';
-const char UART_POUR_LIQUID_ML = 'e';
-const char UART_POUR_ALL_LIQUID = 'f';
-const char UART_RETURN_TO_BASE = 'g';
-const char UART_GET_CORRENT_POSITION = 'i';
-const char UART_GET_ALL_SONARS_VALUE = 'l';
-const char UART_GET_ALL_SENSOR_VALUE = 'o';
-const char UART_STOP = 'p'; // РєРѕРјР°РЅРґР° РѕСЃС‚Р°РЅРѕРІРёС‚СЊСЃСЏ (РЅР°РїСЂРёРјРµСЂ, РґР»СЏ РїРѕР»РёРІР°)
-const char UART_TURN_CAMERA_RIGHT = 'H';
-const char UART_TURN_CAMERA_LEFT = 'I';
-const char UART_TURN_CAMERA_FORWARD = 'J';
-const char UART_TURN_AROUND = 'h';
-
-const char UART_RUN_BACK_TILL_CROSSROAD = 'S';
-const char UART_RUN_BACK = 'T';
-const char UART_RUN_BACK_BY_DISTANCE = 'U';
-
-const char UART_SET_DIRECTION = 'X';
-const char UART_GET_CURRENT_DIRECTION = 'Y';
-        */
     }
     std::cout << std::endl;
     return 1;

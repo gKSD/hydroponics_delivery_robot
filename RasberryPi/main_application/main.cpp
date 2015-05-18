@@ -62,17 +62,17 @@ int main (int argc, char **argv)
 
     vector<task> vv;
     task *t = new task;
-    t->set_address((char *)"C1");
+    t->set_address((char *)"c1");
     vv.push_back(*t);
 
     t = new task;
-    t->set_address((char *)"Q3");
+    t->set_address((char *)"a3");
     vv.push_back(*t);
     t = new task;
-    t->set_address((char *)"B4");
+    t->set_address((char *)"b4");
     vv.push_back(*t);
     t = new task;
-    t->set_address((char *)"O0");
+    t->set_address((char *)"d0");
     vv.push_back(*t);
     try
     {
@@ -87,7 +87,8 @@ int main (int argc, char **argv)
         {
             delete vec[i];
         }*/
-        Task_processor proc (1);
+        char ss[] = "z";
+        Task_processor proc (1, 9, ss);
         proc.set_tasks (vv);
         proc.determine_min_route();
         proc.run_task();

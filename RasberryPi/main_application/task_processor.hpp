@@ -12,9 +12,9 @@
 class Task_processor
 {
     public:
-        Task_processor(size_t left_base_pos);
-        Task_processor(std::vector<task> tasks, size_t left_base_pos);
-        Task_processor(task task, size_t left_base_pos);
+        Task_processor(size_t left_base_pos, int last_number, char * last_letter);
+        Task_processor(std::vector<task> tasks, size_t left_base_pos, int last_number, char * last_letter);
+        Task_processor(task task, size_t left_base_pos, int last_number, char * last_letter);
         ~Task_processor();
 
         int determine_min_route();

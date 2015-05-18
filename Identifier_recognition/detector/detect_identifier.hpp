@@ -34,12 +34,12 @@ using namespace cv;
 /** Global variables */
 
 static const char error_tag[] = "[ERROR]";
-static String identifier_cascade_name = "../Haar/haarcascade\\cascade.xml";
+static String identifier_cascade_name = "/home/sofia/programs/hydroponics_delivery_robot/Identifier_recognition/Haar/haarcascade\\cascade.xml";
 //CascadeClassifier identifier_cascade;
 
 static const char window_name[] = "Capture - Identifier detection";
 static const char window_name_with_id_ROI[] = "Detected identifier";
-static const char template_dir[] = "../Templates/tanulic/";
+static const char template_dir[] = "/home/sofia/programs/hydroponics_delivery_robot/Identifier_recognition//Templates/tanulic/";
 
 static const int min_symbol_width = 55;
 static const int min_symbol_height = 85;

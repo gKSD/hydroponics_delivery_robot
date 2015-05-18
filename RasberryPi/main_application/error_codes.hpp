@@ -10,4 +10,6 @@
 
 #define CAMERA_CAPTURE_ERROR 300
 
+
+#define GARDEN_BED_ADDRESS_ERROR 400
 #endif

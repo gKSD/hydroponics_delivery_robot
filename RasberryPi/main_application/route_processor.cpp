@@ -1,9 +1,9 @@
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "route_processor.hpp"
 #include <iostream>
 #include <math.h>
 #include "travelling_salesman.hpp"
-
+#include <string.h>
 
 Route_processor::Route_processor(size_t left_item_pos, int last_number, char* last_letter)
 {
@@ -16,11 +16,34 @@ Route_processor::Route_processor(size_t left_item_pos, int last_number, char* la
 	_last_number = last_number;
 	_last_letter = last_letter;
 	_left_item_pos = left_item_pos;
+
+    _flag_is_base = true;
+    _flag_is_left = false;
+    _flag_is_right = false;
+    _flag_is_forward = true;
+    _flag_is_back = false;
+    _first_time = true;
+    _flag_is_last = false;
+
 }
 
 route_vector Route_processor::run(std::vector<char*>& garden_beds)
 {
+    int garden_beds_size = garden_beds->size();
+    for (int i = 0; i < garden_beds_size; i++)
+    {
+        if (*(garden_beds[i]) > *last_letter)
+        {
+            throw GARDEN_BED_ADDRESS_ERROR;
+        }
+        char *digit = garden_beds[i] + 1;
+        int d = atoi (digit);
 
+        if (d > last_number)
+        {
+            throw GARDEN_BED_ADDRESS_ERROR;
+        }
+    }
     route_vector vec;
 	//char ** mas =  garden_beds.data();
 	char str[3];
@@ -48,8 +71,7 @@ route_vector Route_processor::run(std::vector<char*>& garden_beds)
 		vec.push_back(Get_route(garden_beds[n - route[i]], garden_beds[n - route[i + 1]]));
 		
 	}
-   
-
+  
 /*	char a[3] = "c4";
 	char b[3] = "a1";
 	Get_route(a, b);*/
@@ -65,6 +87,7 @@ void Route_processor::Prepare_flags()
 	_flag_is_forward = true;
 	_flag_is_back = false;
 	_flag_is_last = false;
+    _first_time = true;
 }
 
 void Route_processor::To_lower_case(char* garden_bed) 
@@ -80,9 +103,11 @@ route_item * Route_processor::Get_route(char* garden_bed_1, char* garden_bed_2)
 
 {
 	std::cout << " route " << garden_bed_1 << "   to  " << garden_bed_2 << std::endl;
-//	To_lower_case(garden_bed_1);
-//	To_lower_case(garden_bed_2);
-	char *current_position = garden_bed_1;
+	To_lower_case(garden_bed_1);
+	To_lower_case(garden_bed_2);
+	//char *current_position = garden_bed_1;
+    char current_position[3];
+    strcpy(current_position, garden_bed_1);
 	route_item *previous_item = NULL;
 	route_item *item;
 	route_item *first_item = NULL;

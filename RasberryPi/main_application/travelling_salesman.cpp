@@ -10,7 +10,7 @@
 всех городов возможен).
 Программа ищет путь с помощью метода ветвей и границ.
 */
-#include "stdafx.h"
+//#include "stdafx.h"
 #include <iostream>
 #include "travelling_salesman.hpp"
 
