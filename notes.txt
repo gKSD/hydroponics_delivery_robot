@@ -141,3 +141,15 @@ bcmXXX - либа для работы с пинами на разберри
 
 ссылка, которой я отключила запуск сериала на расберри, что позволяет остальным процессам работам с ним
 http://www.raspberry-projects.com/pi/pi-operating-systems/raspbian/io-pins-raspbian/uart-pins
+
+
+
+
+************************************************************************************************************
+создание клиента и сервера в различных потоках и органиация общения между процессами:
+
+хорошее описание 
+http://theboostcpplibraries.com/boost.interprocess-shared-memory
+
+пример библиотеки 
+http://prograholic.blogspot.ru/2011/11/boostinterprocess.html

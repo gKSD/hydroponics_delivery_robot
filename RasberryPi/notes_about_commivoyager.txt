@@ -28,3 +28,10 @@ wiringPi - for C serial
 	to compile programs with wriingPi, you need add:
 		-lwiringPi
 		-lwiringPiDev
+
+
+https://github.com/vim-scripts/BusyBee.git
+
+
+
+сделать передачу границ поляны всей
