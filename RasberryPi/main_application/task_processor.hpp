@@ -29,6 +29,8 @@ class Task_processor
 
         int pour_liquid(int ml);
 
+        int drive_by_command(char *command);
+
     private:
         void extract_garden_bed_addresses();
         int process_garden_bed();

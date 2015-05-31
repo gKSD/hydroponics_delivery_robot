@@ -10,7 +10,6 @@
 
 using namespace std;
 
-
 //http://habr.x1site.ru/
 
 int main (int argc, char **argv)

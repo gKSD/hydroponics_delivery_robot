@@ -4,7 +4,7 @@
 #include <math.h>
 #include "travelling_salesman.hpp"
 #include <string.h>
-
+#include "error_codes.hpp"
 Route_processor::Route_processor(size_t left_item_pos, int last_number, char* last_letter)
 {
 	
@@ -29,17 +29,17 @@ Route_processor::Route_processor(size_t left_item_pos, int last_number, char* la
 
 route_vector Route_processor::run(std::vector<char*>& garden_beds)
 {
-    int garden_beds_size = garden_beds->size();
+    int garden_beds_size = garden_beds.size();
     for (int i = 0; i < garden_beds_size; i++)
     {
-        if (*(garden_beds[i]) > *last_letter)
+        if (*(garden_beds[i]) > *_last_letter)
         {
             throw GARDEN_BED_ADDRESS_ERROR;
         }
         char *digit = garden_beds[i] + 1;
         int d = atoi (digit);
 
-        if (d > last_number)
+        if (d > _last_number)
         {
             throw GARDEN_BED_ADDRESS_ERROR;
         }
