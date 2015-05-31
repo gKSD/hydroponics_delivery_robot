@@ -1,0 +1,105 @@
+{% extends 'navbar.html' %}
+{% load staticfiles %}
+
+{% block subpage %}
+
+  {% for gardenbed in gardenbeds %}
+
+    {% cycle '<div class="row">' '' '' ''%}
+    	<div class="col-xs-6 col-md-3">
+    		{% if gardenbed.gardenbed_plant.plant_image_path %}
+    			<a href="" class="thumbnail openeditform" data-toggle="modal" data-target="#gModal" gardenbed-id="{{gardenbed.id}}">
+    				<img src="{% static gardenbed.gardenbed_plant.plant_image_path %}" alt="{{gardenbed.gardenbed_plant.plant_name}}" height="100" width="100" />
+    			</a>
+    		{% else %}
+    			<a href="" class="thumbnail openeditform" data-toggle="modal" data-target="#gModal" gardenbed-id="{{gardenbed.id}}">
+    				<img src="{% static 'add.png' %}" alt="Empty" height="100" width="100">
+    			</a>
+    		{% endif %}
+    		
+  	  	</div>
+    {% cycle '' '' '' '</div>' %}
+	{% endfor %}
+
+<!-- Edit form -->
+<div class="modal fade" id="gModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="modal-title"></h4>
+				</div>
+				<div class="modal-body">
+					<form id="editForm" action="#" method="post">
+  						<div class="form-group">
+      						<label for="selPlantName">Название</label>
+      						<select class="form-control" id="sel-plant-name">
+        						<!--<option>1</option>-->
+      						</select>
+    					</div>
+              <label>Описание растения</label>
+              <div class="panel panel-default">
+                <div class="panel-body" id="plant-description">
+                </div>
+              </div>
+    					<div class="form-group">
+      						<label for="selPlantMix">Раствор</label>
+      						<select class="form-control" id="sel-plant-mix">
+        						<!--<option>1</option>-->
+      						</select>
+    					</div>
+              <label>Время полива</label>
+              <div id="time-checkboxes">
+                <span class="label label-primary">Утро:</span>
+                <div>
+                  <label><input type="checkbox" class="chkbox" id="t6"/>06:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t7"/>07:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t8"/>08:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t9"/>09:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t10"/>10:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t11"/>11:00</label>
+                </div>
+                <span class="label label-primary">День:</span>
+                <div>
+                  <label><input type="checkbox" class="chkbox" id="t12"/>12:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t13"/>13:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t14"/>14:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t15"/>15:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t16"/>16:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t17"/>17:00</label>
+                </div>
+                <span class="label label-primary">Вечер:</span>
+                <div>
+                  <label><input type="checkbox" class="chkbox" id="t18"/>18:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t19"/>19:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t20"/>20:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t21"/>21:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t22"/>22:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t23"/>23:00</label>
+                </div>
+                <span class="label label-primary">Ночь:</span>
+                <div>
+                  <label><input type="checkbox" class="chkbox" id="t0"/>00:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t1"/>01:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t2"/>02:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t3"/>03:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t4"/>04:00</label>
+                  <label><input type="checkbox" class="chkbox" id="t5"/>05:00</label>
+                </div>
+              </div>
+					</form>
+				</div>
+				<div class="modal-footer">
+          <cont>
+          <button type="button" class="btn btn-primary pull-left" id = "clear-all-button">Очистить все</button>
+          <button type="button" class="btn btn-primary" id="save-button" disabled=true>Сохранить</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+				</div>
+		</div>
+	</div>
+</div>
+
+<!--<script src="js/customscript.js" type="text/javascript"></script> --> 
+
+{% endblock subpage %}
+

@@ -1,0 +1,251 @@
+{% extends 'navbar.html' %}
+
+{% block subpage %}
+
+<p>ROBOT</p>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+<script type='text/javascript'>
+
+var is_manual = false;
+
+function btn_turn_left() {
+	if (is_manual) {
+		alert("is trun left");
+		$.ajax({
+	        url: "btn_left/",
+	        data: {},
+	        cache: false,
+	        success: function(){
+	            //delayedAlert();
+	            alert("123456 left");
+	        }
+	    });
+	}
+}
+function btn_turn_right() {
+	if (is_manual) {
+		alert("is trun right");
+		$.ajax({
+	        url: "btn_right/",
+	        data: {},
+	        cache: false,
+	        success: function(){
+	            //delayedAlert();
+	            alert("123456 right");
+	        }
+	    });
+	}
+}
+function btn_run_back() {
+	if (is_manual) {
+		alert("is trun back");
+		$.ajax({
+	        url: "btn_back/",
+	        data: {},
+	        cache: false,
+	        success: function(){
+	            //delayedAlert();
+	            alert("123456 back");
+	        }
+	    });
+	}
+}
+function btn_run_forward() {
+	if (is_manual) {
+		alert("is trun forward");
+		$.ajax({
+	        url: "btn_forward/",
+	        data: {},
+	        cache: false,
+	        success: function(){
+	            //delayedAlert();
+	            alert("123456 forward");
+	        }
+	    });
+	}
+}
+function btn_turn_around() {
+	if (is_manual) {
+		alert("is trun around");
+		$.ajax({
+	        url: "btn_taround/",
+	        data: {},
+	        cache: false,
+	        success: function(){
+	            //delayedAlert();
+	            alert("123456 around");
+	        }
+	    });
+	}
+}
+function btn_stop_moving() {
+	if (is_manual) {
+		alert("is stop");
+		$.ajax({
+	        url: "btn_stop/",
+	        data: {},
+	        cache: false,
+	        success: function(){
+	            //delayedAlert();
+	            alert("123456 stop");
+	        }
+	    });
+	}
+}
+
+function btn_turn_cam_right() {
+	if (is_manual) {
+		alert("is btn_turn_cam_right");
+		$.ajax({
+	        url: "btn_cam_right/",
+	        data: {},
+	        cache: false,
+	        success: function(){
+	            //delayedAlert();
+	            alert("123456 cam_right");
+	        }
+	    });
+	}
+}
+function btn_turn_cam_left() {
+	if (is_manual) {
+		alert("is btn_turn_cam_left");
+		$.ajax({
+	        url: "btn_cam_left/",
+	        data: {},
+	        cache: false,
+	        success: function(){
+	            //delayedAlert();
+	            alert("123456 cam_left");
+	        }
+	    });
+	}
+}
+function btn_stop_cam() {
+	if (is_manual) {
+		alert("is btn_stop_cam");
+		$.ajax({
+	        url: "btn_cam_stop/",
+	        data: {},
+	        cache: false,
+	        success: function(){
+	            //delayedAlert();
+	            alert("123456 cam_stop");
+	        }
+	    });
+	}
+}
+</script>
+
+<style type="text/css">
+.parent {
+	position: relative;
+	left: 100px;
+}
+.top {
+	position:absolute;
+	left:50px;
+}
+
+.left {
+	top:35px;
+	position:absolute;
+	left:0px;
+}
+
+.right {
+	top:35px;
+    position:absolute;
+	left:135px;
+}
+
+.down {
+	top:60px;
+    position: absolute;
+    left: 63px;
+}
+
+.reverse {
+	top:35px;
+    position:absolute;
+	left:200px;
+}
+</style>
+
+<div>
+	<center>
+		<img id="video-streaming" align="center" src="http://localhost:5000/video_feed.jpg"></img>
+	</center>
+</div>
+
+<div>
+	<script type="text/javascript">
+		$(document).ready(function() {
+            $(".dropdown-menu li a").click(function(){
+  				var selText = $(this).text();
+  				alert(selText);
+
+  				if ($(this).text() == "Ручное") {
+  					alert(111);
+  					$( "#robot-driving" ).prop('disabled',true);
+  					is_manual = true;
+  				}
+  				else {
+  					$( "#robot-driving" ).prop('disabled',true);
+  					is_manual = false;
+  				}
+  				$(this).parents('.btn-group').find('.dropdown-toggle').html(selText+' <span class="caret"></span>');
+			}); 
+        });
+	</script>
+	<div class="btn-group"> <a class="btn btn-default dropdown-toggle btn-select2" data-toggle="dropdown" href="#">Тип управления <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="#">Ручное</a></li>
+            <li><a href="#">Автоматическое</a></li>
+        </ul>
+    </div>
+    <div id="robot-driving">
+		<div>
+			<h3> ROBOT </h3>
+			<cont>
+				<div class="parent">
+					<div class="top">
+						<button type="button" style="width:100" class="btn btn-primary pull-left" id = "run-forward-button" onmousedown='btn_run_forward()' onmouseup='btn_stop_moving()'>FORWARD</button>
+					</div>
+					<div class="left">
+						<button type="button" style="width:100" class="btn btn-primary pull-left" id = "turn-left-button" onclick='btn_turn_left()'>LEFT</button>
+					</div>
+					<div class="right">	
+						<button type="button" style="width:100" class="btn btn-primary pull-left" id = "turn-right-button" onclick='btn_turn_right()'>RIGHT</button>
+					</div>
+					<div class="down">
+						<button type="button" style="width:100" class="btn btn-primary pull-left" id = "run-back-button" onmousedown='btn_run_back()' onmouseup='btn_stop_moving()'>DOWN</button>
+					</div>
+					<div class="reverse">
+						<button type="button" style="width:100" class="btn btn-primary pull-left" id = "turn-around-button" onclick='btn_turn_around()'>REVERSE</button>
+					</div>
+				</div>
+			</cont>
+		</div>
+
+		<br/>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
+
+		<div>
+			<h3> Управление камерой </h3>
+			<cont>
+				<button type="button" class="btn btn-primary pull-left" id = "turn-cam-right-button" onmousedown='btn_turn_cam_right()' onmouseup='btn_stop_cam()'>Камеру вправо</button>
+				<button type="button" class="btn btn-primary pull-left" id = "turn-cam-left-button" onmousedown='btn_turn_cam_left()' onmouseup='btn_stop_cam()'>Камеру влево</button>
+			</cont>
+		</div>
+	</div>
+</div>
+
+{% endblock subpage %}

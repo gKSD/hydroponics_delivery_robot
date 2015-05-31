@@ -1,0 +1,17 @@
+{% extends 'main.html' %}
+
+{% block mainpage %}
+<div class="container mycontainer">
+    <form class="form-signin" action="/login/" method="post">{% csrf_token %}
+      <h2 class="form-signin-heading">Please sign in</h2>
+      <label for="username" class="sr-only">Login</label>
+      <input type="login" id="username" name="username" class="form-control" placeholder="Login" required autofocus>
+      <label for="password" class="sr-only">Password</label>
+      <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
+      {% if login_error %}
+        <label class="error">{{ login_error }}</label>
+      {% endif %}
+      <input class="button" type="submit" value="Sign in">
+    </form>      
+  </div>
+{% endblock mainpage%} 

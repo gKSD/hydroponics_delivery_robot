@@ -1,0 +1,82 @@
+{% extends 'navbar.html' %}
+
+{% block subpage %}
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<a href="" class="btn btn-primary pull-right" data-toggle="modal" data-target="#gAddMixModal">+ Добавить раствор</a>
+			</div>
+		</div>
+		<hr>
+			{% for m in mixs %}
+				<div class="panel panel-default">
+  				<div class="panel-body">
+				<form action="/mixs/" method="POST" id="mix_form_{{m.id}}">
+					<input type="hidden" name="mix_id" value={{m.id}}>
+        	    	<div>
+        	    		<h4>{{m.mix_name}}</h4>
+        	    	</div>
+        	    	<div class="row">
+        	    		<div class="col-md-1"><label>Описание:</label></div>
+        	    		<div class="col-md-6"><textarea name="mix_description" class="form-control">{{m.mix_description}}</textarea></div>
+        	    	</div>
+        	    	<label>Состав:</label>
+    	    		{% for p in m.mix_proportions.all %}
+    	    		<div class="row">
+    	    			<div class="col-md-1"></div>
+    	    			<div class="col-md-2">
+    	    				<label name={{p.proportion_ingredient.id}}>{{p.proportion_ingredient.ingredient_name}}:</label>
+    	    			</div>
+    	    			<div class="col-md-1">
+    	    				<input name="ingredient_amount_{{p.proportion_ingredient.id}}" type="number" value={{p.proportion_ingredient_amount}}>
+    	    			</div>
+    	    			</div>
+    	    		{% endfor%}
+    	    		<hr>
+    	    		<div class="row">
+    	    			<div class="col-md-7">
+    	    				<div class="btn-group pull-right" role="group">
+    	    					<input type="submit" class="btn btn-success" value="Сохранить"/>
+        						<button type="button" class="btn btn-danger delete-button" id="edit-mix-delete-button" mix-id={{m.id}}>Удалить</button>
+     						</div>
+     					</div>
+     				</div>
+        		</form>
+        		</div>
+        		</div>		
+		{% endfor%}
+	</div>
+
+
+<!-- Mix add form -->
+<div class="modal fade" id="gAddMixModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="modal-title-plant-add">Создать раствор </h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+            <label for="add_mix_name">Название раствора:</label>
+            <input id="add_mix_name" name="mix_name" type="text" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="add_mix_description">Описание раствора:</label>
+            <textarea id="add_mix_description" name="mix_description" class="form-control"></textarea>
+          </div>
+      	{% for i in ingredients %}
+      		<label>{{i.ingredient_name}}</label>
+      		<input class="add_ingredient_amount" ingredient-id='{{i.id}}' type="number" value=10 />
+      	{% endfor %}
+      </div>
+      <div class="modal-footer">
+          <button type="button" class="btn btn-success" id="add-mix-button">Создать</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock subpage %}
